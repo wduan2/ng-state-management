@@ -1,0 +1,14 @@
+<div class='menu'>
+    <p class='menu-label' style='font-size: 200%'>Select</p>
+
+    <ul class='menu-list' style='font-size: 180%'>
+        <li *ngFor='let option of metadataOptions' [ngClass]="{'expand': 'isMetadataReady()'}">
+            <a (click)='fetchMetadata(option.id)'>{{option.name}}</a>
+            <ul *ngIf='isMetadataReady() && isMetadataSelected(option.id)' class='menu-list'>
+                <li *ngFor='let record of metadata.records'>
+                    <a (click)='fetchRecord(record.id)'>{{record.name}}</a>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</div>
