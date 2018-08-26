@@ -1,13 +1,14 @@
-import { EntityState, EntityStore } from "@datorama/akita";
-import { ProductState } from "./product-state";
 import { Injectable } from "@angular/core";
+import { EntityState, EntityStore, StoreConfig } from "@datorama/akita";
+import { Product } from "./data/product";
 
-export interface ProductEntity extends EntityState<ProductState> {};
+export interface ProductState extends EntityState<Product> {};
 
 @Injectable({
     providedIn: 'root'
 })
-export class ProductStore extends EntityStore<ProductEntity, ProductState> {
+@StoreConfig({ name: 'productStore '})
+export class ProductStore extends EntityStore<ProductState, Product> {
     constructor() {
         super();
     }

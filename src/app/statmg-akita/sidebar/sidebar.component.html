@@ -1,14 +1,10 @@
 <div class='menu'>
-    <p class='menu-label' style='font-size: 200%'>Select</p>
+    <p class='menu-label' style='font-size: 200%'>Products</p>
 
-    <ul class='menu-list' style='font-size: 180%'>
-        <li *ngFor='let option of metadataOptions' [ngClass]="{'expand': 'isMetadataReady()'}">
-            <a (click)='fetchMetadata(option.id)'>{{option.name}}</a>
-            <ul *ngIf='isMetadataReady() && isMetadataSelected(option.id)' class='menu-list'>
-                <li *ngFor='let record of metadata.records'>
-                    <a (click)='fetchRecord(record.id)'>{{record.name}}</a>
-                </li>
-            </ul>
+    <a class='button is-primary' (click)='fetchProductList()'>Load</a>
+    <ul *ngIf='!(proudctListLoading$ | async)' class='menu-list'>
+        <li *ngFor='let product of (productList$ | async)'>
+            <a (click)='fetchProductDetails(product.id)'>{{product.name}}</a>
         </li>
     </ul>
 </div>

@@ -1,4 +1,12 @@
 import { Component, OnInit } from '@angular/core';
+import { ID, noop } from '@datorama/akita';
+import { Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
+import { DataService } from '../data/data.service';
+import { Product } from '../data/product';
+import { ProductDetails } from '../data/product-details';
+import { ProductQuery } from '../product-query';
+import { ProductStore } from '../product-store';
 
 @Component({
   selector: 'app-sidebar',
@@ -7,43 +15,50 @@ import { Component, OnInit } from '@angular/core';
 })
 export class SidebarComponent implements OnInit {
 
-  metadata = {};
-  selectedMetadataId = -1;
+  productList$: Observable<Product[]>;
+  proudctListLoading$: Observable<boolean>;
+  
+  productDetails$: Observable<ProductDetails[]>;
+  productDetailsLoading$: Observable<boolean>;
 
-  constructor() {
+  selectedProductId: ID;
+
+  constructor(private dataService: DataService, private productStore: ProductStore, private productQuery: ProductQuery) {
   }
 
   ngOnInit() {
+    
   }
 
-  fetchMetadata(metadataId: number) {
-    // if (metadataId) {
-    //   this.metadata = this.mockMetadataSets.find((e) => e.id === metadataId);
+  // ------------------ Akita ------------------
 
-    //   if (!this.metadata) {
-    //     console.error(`Invalid metadataId: ${metadataId}`);
-    //   } else {
-    //     this.selectedMetadataId = metadataId;
-    //     console.log(`Set selectedMetadataId to ${metadataId}`);
-    //   }
-    // } else {
-    //   console.error('Missing metadataId!');
-    // }
+  fetchProductList() {
+    this.fetchProductListLoader().subscribe();
+    this.productDetailsLoading$ = this.productQuery.selectLoading();
+    this.productList$ = this.productQuery.selectAll();
   }
 
-  isMetadataReady() {
-    return !!this.selectedMetadataId && !!this.metadata;
+  private fetchProductListLoader(): Observable<Product[]> {
+    const request = this.dataService.getProducts().pipe(
+      tap(products => { 
+        // replace old state list by new state list
+        // TODO: how main different product groups
+        this.productStore.set(products);
+
+        console.log(this.productQuery.getSnapshot());
+      })
+    )
+
+    return this.productQuery.isPristine ? request : noop();
+  } 
+
+  // ------------------ Akita ------------------
+
+  isProductSelected(productId: ID) {
+    return this.selectedProductId === productId;
   }
 
-  isMetadataSelected(optionId: number) {
-    return this.selectedMetadataId === optionId;
-  }
-
-  fetchRecord(recordId: string) {
-
-  }
-
-  toggleRecord(recordId: string) {
+  fetchProductDetails(productId: ID) {
 
   }
 }
