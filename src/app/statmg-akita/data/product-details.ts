@@ -2,7 +2,7 @@ import { ID } from '@datorama/akita';
 
 export class ProductDetails {
     id: ID;
-    key: string;
+    productId: ID;
     desc: string;
     rate: number;
 }
