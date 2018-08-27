@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { ID } from '@datorama/akita';
 import { Observable, timer } from 'rxjs';
 import { map, mapTo } from 'rxjs/operators';
-import { ProductDetailsLoadingQuery } from '../product-details-loading-query';
 import { Product } from './product';
 import { ProductDetails } from './product-details';
 
@@ -47,10 +46,6 @@ export class DataService {
         } as ProductDetails,
     ];
     /** mock data */
-
-    constructor(private productDetailsLoadingQuery: ProductDetailsLoadingQuery) {
-
-    }
 
     getProducts(): Observable<Product[]> {
         return timer(2000).pipe(

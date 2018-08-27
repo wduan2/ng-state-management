@@ -1,4 +1,8 @@
 import { Component, OnInit } from '@angular/core';
+import { Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
+import { ProductDetails } from '../data/product-details';
+import { ProductDetailsQuery } from '../product-details-query';
 
 @Component({
   selector: 'app-stage',
@@ -7,12 +11,18 @@ import { Component, OnInit } from '@angular/core';
 })
 export class StageComponent implements OnInit {
 
-  constructor() { }
+  productDetails: ProductDetails[] = [];
+
+  // productDetails$: Observable<ProductDetails[]>;
+  // productDetailsLoading$: Observable<boolean>;
+
+  constructor(private productDetailsQuery: ProductDetailsQuery) { }
 
   ngOnInit() {
-  }
-
-  displayRecord() {
-
+    // this.productDetailsLoading$ = this.productDetailsQuery.selectLoading();
+    // TODO: find out why 'let product of (productList$ | async)' doesn't work
+    this.productDetailsQuery.selectAll().subscribe(
+      (details) => this.productDetails = details
+    );
   }
 }
