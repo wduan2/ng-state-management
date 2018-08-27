@@ -45,7 +45,7 @@ export class SidebarComponent implements OnInit {
     const request = this.dataService.getProducts().pipe(
       tap(products => {
         // replace old state list by new state list
-        // TODO: how main different product groups
+        // TODO: how to maintain different product groups
         this.productStore.set(products);
 
         console.log('product store snapshot:');
