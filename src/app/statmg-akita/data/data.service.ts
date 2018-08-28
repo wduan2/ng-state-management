@@ -27,19 +27,16 @@ export class DataService {
 
     private mockProductDetails = [
         {
-            id: 1,
             productId: 1,
             desc: 'JavaScript, often abbreviated as JS, is a high-level, interpreted programming language. It is a language which is also characterized as dynamic, weakly typed, prototype-based and multi-paradigm.',
             rate: 5
         } as ProductDetails,
         {
-            id: 2,
             productId: 2,
             desc: 'Angular is a TypeScript-based open-source front-end web application platform led by the Angular Team at Google and by a community of individuals and corporations. Angular is a complete rewrite from the same team that built AngularJS.',
             rate: 4
         } as ProductDetails,
         {
-            id: 3,
             productId: 3,
             desc: "Spring Boot is a lightweight framework that takes most of the work out of configuring Spring-based applications. In this tutorial, you'll learn how to use Spring Boot's starters, opinions, and executable JAR file structure to quickly create Spring-based applications that \"just run.\"",
             rate: 3

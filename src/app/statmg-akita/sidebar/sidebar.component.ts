@@ -20,8 +20,6 @@ export class SidebarComponent implements OnInit {
   productList$: Observable<Product[]>;
   proudctListLoading$: Observable<boolean>;
 
-  selectedProductId: ID;
-
   constructor(private dataService: DataService,
     private productStore: ProductStore,
     private productQuery: ProductQuery,
@@ -48,29 +46,44 @@ export class SidebarComponent implements OnInit {
         // TODO: how to maintain different product groups
         this.productStore.set(products);
 
-        console.log('product store snapshot:');
-        console.log(this.productQuery.getSnapshot());
+        console.debug('product store snapshot:');
+        console.debug(this.productQuery.getSnapshot());
       })
     )
 
     return this.productQuery.isPristine ? request : noop();
   }
 
-  fetchProductDetails(productId: ID) {
-    this.fetchProductDetailsLoader(productId).subscribe();
+  onProductSelected(productId: ID) {
+    if (this.productDetailsQuery.hasEntity(productId)) {
+      this.toggleProductDetails(productId);
+    } else {
+      this.fetchProductDetailsLoader(productId).subscribe(() => {
+        this.productDetailsStore.setLoading(false);
+      });
+    }
+  }
+
+  private toggleProductDetails(productId: ID) {
+    // toggle sidebar style
+    const oldProductState = this.productQuery.getEntity(productId);
+    this.productStore.update(productId, { selected: !oldProductState.selected });
+
+    // toggle stage cards
+    const oldProductDetailsState = this.productDetailsQuery.getEntity(productId);
+    this.productDetailsStore.update(productId, { display: !oldProductDetailsState.display });
+    console.debug('product details store snapshot:');
+    console.debug(this.productDetailsQuery.getSnapshot());
   }
 
   private fetchProductDetailsLoader(productId: ID): Observable<ProductDetails> {
     const request = this.dataService.getProductDetails(productId).pipe(
       tap(productDetails => {
-        if (this.productDetailsQuery.getEntity(productId)) {
-          this.productDetailsStore.update(productId, productDetails);
-        } else {
-          this.productDetailsStore.add(productDetails);
-        }
-
-        console.log('product details store snapshot:');
-        console.log(this.productDetailsQuery.getSnapshot());
+        productDetails.display = true;
+        this.productDetailsStore.add(productDetails);
+        this.productStore.update(productId, { selected: true });
+        console.debug('product details store snapshot:');
+        console.debug(this.productDetailsQuery.getSnapshot());
       })
     )
 
@@ -80,6 +93,6 @@ export class SidebarComponent implements OnInit {
   // ------------------ Akita ------------------
 
   isProductSelected(productId: ID) {
-    return this.selectedProductId === productId;
+    return this.productQuery.hasEntity(productId) && this.productQuery.getEntity(productId).selected;
   }
 }

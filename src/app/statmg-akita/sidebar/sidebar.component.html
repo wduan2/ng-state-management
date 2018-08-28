@@ -1,10 +1,10 @@
-<div class='menu'>
+<div class='menu' style='margin: 4px'>
     <p class='menu-label' style='font-size: 200%'>Products</p>
 
     <a class='button is-primary' (click)='fetchProductList()'>Load</a>
     <ul *ngIf='!(proudctListLoading$ | async)' class='menu-list'>
         <li *ngFor='let product of (productList$ | async)'>
-            <a (click)='fetchProductDetails(product.id)'>{{product.name}}</a>
+            <a (click)='onProductSelected(product.id)' style='margin: 4px; padding: 1px' [ngClass]="{ 'is-active': isProductSelected(product.id) }">{{product.name}}</a>
         </li>
     </ul>
 </div>

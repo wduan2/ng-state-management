@@ -13,16 +13,13 @@ export class StageComponent implements OnInit {
 
   productDetails: ProductDetails[] = [];
 
-  // productDetails$: Observable<ProductDetails[]>;
-  // productDetailsLoading$: Observable<boolean>;
+  productDetails$: Observable<ProductDetails[]>;
+  productDetailsLoading$: Observable<boolean>;
 
   constructor(private productDetailsQuery: ProductDetailsQuery) { }
 
   ngOnInit() {
-    // this.productDetailsLoading$ = this.productDetailsQuery.selectLoading();
-    // TODO: find out why 'let product of (productList$ | async)' doesn't work
-    this.productDetailsQuery.selectAll().subscribe(
-      (details) => this.productDetails = details
-    );
+    this.productDetailsLoading$ = this.productDetailsQuery.selectLoading();
+    this.productDetails$ = this.productDetailsQuery.selectAll({ filterBy: (s) => s.display });
   }
 }

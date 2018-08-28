@@ -7,7 +7,7 @@ export interface ProductDetailsState extends EntityState<ProductDetails> {};
 @Injectable({
     providedIn: 'root'
 })
-@StoreConfig({ name: 'productDetailsStore '})
+@StoreConfig({ name: 'productDetailsStore', idKey: 'productId' })
 export class ProductDetailsStore extends EntityStore<ProductDetailsState, ProductDetails> {
     constructor() {
         super();

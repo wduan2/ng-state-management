@@ -1,5 +1,6 @@
-<div *ngIf="!!productDetails">
-  <div *ngFor="let detail of productDetails" class="card">
+<div *ngIf="!(productDetailsLoading$ | async)">
+  <hr/>
+  <div *ngFor="let detail of (productDetails$ | async)" class="card">
     <header class="card-header">
       <p class="card-header-title">Details</p>
     </header>
@@ -11,5 +12,6 @@
     <footer class="card-footer">
       <p class="card-footer-item">{{detail.rate}}</p>
     </footer>
+    <hr/>
   </div>
 </div>
