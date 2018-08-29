@@ -1,8 +1,8 @@
 <div class='menu' style='margin: 4px'>
-    <p class='menu-label' style='font-size: 200%'>Akita</p>
+    <p class='menu-label' style='font-size: 200%'>NGXS</p>
 
     <a class='button is-primary' (click)='fetchProductList()'>Load</a>
-    <ul *ngIf='!(proudctListLoading$ | async)' class='menu-list'>
+    <ul class='menu-list'>
         <li *ngFor='let product of (productList$ | async)'>
             <a (click)='onProductSelected(product.id)' style='margin: 12px; padding: 8px' [ngClass]="{ 'is-active': isProductSelected(product.id) }">{{product.name}}</a>
         </li>

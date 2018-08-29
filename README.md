@@ -33,3 +33,6 @@ Rules:
 - Separate services/computation from state management
 - Optimistic updates require separate actions to deal with errors
 - Use immutable data for persistent and client state
+
+Angular Notes:
+- routing.ts must be imported after modules in the app.module.ts
