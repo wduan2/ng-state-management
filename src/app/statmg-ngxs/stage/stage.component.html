@@ -1,6 +1,6 @@
-<div *ngIf="!(productDetailsLoading$ | async)">
+<div>
   <hr/>
-  <div *ngFor="let detail of (productDetails$ | async)" class="card">
+  <div *ngFor="let detail of (productDetailsList$ | async)" class="card">
     <header class="card-header">
       <p class="card-header-title">Details</p>
     </header>

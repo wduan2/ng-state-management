@@ -36,3 +36,8 @@ Rules:
 
 Angular Notes:
 - routing.ts must be imported after modules in the app.module.ts
+
+NGXS Notes:
+- In State class any reduce function (with @Action) must not be static
+- store.select will return all (current) states in the store
+- the name of each state is defined by the 'name' field of @State

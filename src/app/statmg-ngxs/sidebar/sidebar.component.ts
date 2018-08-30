@@ -1,9 +1,9 @@
-import { Product } from '../data/product';
-import { Observable } from 'rxjs';
-import { AddProductDetails, LoadProductList, RemoveProductDetails } from './../product.actions';
 import { Component, OnInit } from '@angular/core';
+import { Select, Store } from '@ngxs/store';
+import { Observable } from 'rxjs';
 import { DataService } from '../data/data.service';
-import { Store, Select } from '@ngxs/store';
+import { Product } from '../data/product';
+import { AddProductDetails, LoadProductList, ToggleProduct, ToggleProductDetails } from './../product.actions';
 
 @Component({
   selector: 'app-sidebar',
@@ -12,13 +12,21 @@ import { Store, Select } from '@ngxs/store';
 })
 export class SidebarComponent implements OnInit {
 
+  /**
+   * - same as invoking this.store.select((state) => state.productStateModel.productList)
+   * - store.select will return all the StateModels
+   */
+  @Select((state) => state.productStateModel.productList)
   productList$: Observable<Product[]>;
 
+  isProductSelected$: Observable<boolean>;
+
   constructor(private store: Store, private dataService: DataService) {
+    
   }
 
   ngOnInit() {
-    this.productList$ = this.store.select((state) => state.productList);
+
   }
 
   fetchProductList() {
@@ -27,11 +35,22 @@ export class SidebarComponent implements OnInit {
     });
   }
 
-  onProductSelected() {
+  onProductSelected(productId: number | string) {
+    this.store.dispatch([
+      new ToggleProduct(productId),
+      new ToggleProductDetails(productId)
+    ]);
 
+    this.dataService.getProductDetails(productId).subscribe((productDetails) => {
+      this.store.dispatch(new AddProductDetails(productDetails));
+    })
   }
 
-  isProductSelected() {
-
+  isProductSelected(productId: number | string) {
+    // only select one time
+    return this.store.selectOnce((state) => {
+      const product = state.productStateModel.productList.find((product) => product.id === productId);
+      return product.selected;
+    })
   }
 }

@@ -9,18 +9,26 @@ export class LoadProductList {
     }
 }
 
-export class AddProductDetails {
-    static readonly type = 'AddProductDetails';
+export class ToggleProduct {
+    static readonly type = 'ToggleProduct';
 
-    constructor(public productDetails: ProductDetails) {
+    constructor(public productId: number | string) {
 
     }
 }
 
-export class RemoveProductDetails {
-    static readonly type = 'RemoveProductDetails';
+export class ToggleProductDetails {
+    static readonly type = 'ToggleProductDetails';
 
     constructor(public productId: number | string) {
+
+    }
+}
+
+export class AddProductDetails {
+    static readonly type = 'AddProductDetails';
+
+    constructor(public productDetails: ProductDetails) {
 
     }
 }

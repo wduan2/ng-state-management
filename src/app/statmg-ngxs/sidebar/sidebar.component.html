@@ -4,7 +4,7 @@
     <a class='button is-primary' (click)='fetchProductList()'>Load</a>
     <ul class='menu-list'>
         <li *ngFor='let product of (productList$ | async)'>
-            <a (click)='onProductSelected(product.id)' style='margin: 12px; padding: 8px' [ngClass]="{ 'is-active': isProductSelected(product.id) }">{{product.name}}</a>
+            <a (click)='onProductSelected(product.id)' style='margin: 12px; padding: 8px' [ngClass]="{ 'is-active': (isProductSelected(product.id) | async) }">{{product.name}}</a>
         </li>
     </ul>
 </div>

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { Store } from '@ngxs/store';
 import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
 import { ProductDetails } from '../data/product-details';
 
 @Component({
@@ -10,9 +10,13 @@ import { ProductDetails } from '../data/product-details';
 })
 export class StageComponent implements OnInit {
 
-  constructor() { }
+  productDetailsList$: Observable<ProductDetails[]>
+
+  constructor(private store: Store) { }
 
   ngOnInit() {
-
+    this.productDetailsList$ = this.store.select((state) => { 
+      return state.productDetailsStateModel.productDetailsList.filter((productDetails) => productDetails.display);
+    })
   }
 }
