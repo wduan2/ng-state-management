@@ -22,7 +22,7 @@ export class SidebarComponent implements OnInit {
   isProductSelected$: Observable<boolean>;
 
   constructor(private store: Store, private dataService: DataService) {
-    
+
   }
 
   ngOnInit() {
@@ -41,16 +41,17 @@ export class SidebarComponent implements OnInit {
       new ToggleProductDetails(productId)
     ]);
 
+    // TODO: avoid the possible race condition here
     this.dataService.getProductDetails(productId).subscribe((productDetails) => {
       this.store.dispatch(new AddProductDetails(productDetails));
-    })
+    });
   }
 
   isProductSelected(productId: number | string) {
     // only select one time
     return this.store.selectOnce((state) => {
-      const product = state.productStateModel.productList.find((product) => product.id === productId);
+      const product = state.productStateModel.productList.find((p) => p.id === productId);
       return product.selected;
-    })
+    });
   }
 }

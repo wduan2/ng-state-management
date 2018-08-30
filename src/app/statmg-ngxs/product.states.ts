@@ -42,8 +42,8 @@ export class ProductState {
             return product;
         });
         patchState({
-            productList: newProductList 
-        })
+            productList: newProductList
+        });
     }
 }
 
@@ -69,8 +69,8 @@ export class ProductDetailsState {
             return productDetails;
         });
         patchState({
-            productDetailsList: newProductDetailsList 
-        })
+            productDetailsList: newProductDetailsList
+        });
     }
 
     @Action(AddProductDetails)

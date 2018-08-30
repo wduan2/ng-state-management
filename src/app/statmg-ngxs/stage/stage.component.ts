@@ -17,6 +17,6 @@ export class StageComponent implements OnInit {
   ngOnInit() {
     this.productDetailsList$ = this.store.select((state) => { 
       return state.productDetailsStateModel.productDetailsList.filter((productDetails) => productDetails.display);
-    })
+    });
   }
 }
