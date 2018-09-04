@@ -35,9 +35,11 @@ Rules:
 - Use immutable data for persistent and client state
 
 Angular Notes:
-- routing.ts must be imported after modules in the app.module.ts
+- routing.ts (routing for modules) must be imported after other modules in the 'imports' field of app.module.ts
+- <submodule>.routing.ts (routing for components of each module) is required
 
 NGXS Notes:
-- In State class any reduce function (with @Action) must not be static
+- in NGXS state class any reduce function (with @Action) must not be static
 - store.select will return all (current) states in the store
 - the name of each state is defined by the 'name' field of @State
+- to allow the injection of NGXS store, NgxsModule.forRoot([<StateClass1>, <StateClass2>]) must be imported in *.module.ts
