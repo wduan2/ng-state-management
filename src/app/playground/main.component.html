@@ -1,0 +1,11 @@
+<div>
+  <div id="pg-buttons">
+    <button class="pg-button button" [disabled]="started" (click)="start()">start</button>
+    <!-- connected with rxjs -->
+    <button class="pg-button button" #terminate>terminate</button>
+  </div>
+
+  <div id="pg-output" class="content" *ngFor="let message of output">
+    <div class="notification">{{message}}</div>
+  </div>
+</div>

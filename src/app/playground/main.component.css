@@ -1,0 +1,18 @@
+#pg-buttons {
+    margin: auto;
+    width: 50%;
+    padding: 10px;
+}
+
+.pg-button {
+    margin: 5px;
+    width: 50%;
+    padding: 5px;
+}
+
+#pg-output {
+    margin: auto;
+    width: 50%;
+    padding: 10px;
+    text-align: center
+}
