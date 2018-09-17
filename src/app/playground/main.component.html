@@ -1,11 +1,23 @@
 <div>
   <div id="pg-buttons">
-    <button class="pg-button button" [disabled]="started" (click)="start()">start</button>
-    <!-- connected with rxjs -->
-    <button class="pg-button button" #terminate>terminate</button>
+    <div class="select pg-button">
+      <select [(ngModel)]="fakePromiseDelay" (ngModelChange)="setFakePromiseDelay($event)">
+        <option [value]="delay" *ngFor="let delay of fakePromiseDelayOptions">{{delay}}s</option>
+      </select>
+    </div>
+
+    <button class="button pg-button" [disabled]="started" (click)="start()">start</button>
   </div>
 
-  <div id="pg-output" class="content" *ngFor="let message of output">
+  <div class="pg-output">
+    <div class="notification is-warning">
+      tick interval: {{TICK_LENGTH / 1000}} * {{TICK_TIMES}} = {{ TICK_LENGTH / 1000 * TICK_TIMES}}s
+      <br/>
+      fake promise delay: {{fakePromiseDelay / 1000}}s
+    </div>
+  </div>
+
+  <div class="pg-output content" *ngFor="let message of output">
     <div class="notification">{{message}}</div>
   </div>
 </div>

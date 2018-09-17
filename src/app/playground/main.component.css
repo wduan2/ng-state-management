@@ -5,14 +5,12 @@
 }
 
 .pg-button {
-    margin: 5px;
-    width: 50%;
-    padding: 5px;
+    margin: 0 5px;
 }
 
-#pg-output {
+.pg-output {
     margin: auto;
     width: 50%;
-    padding: 10px;
+    padding: 1%;
     text-align: center
 }

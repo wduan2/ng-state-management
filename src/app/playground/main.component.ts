@@ -1,10 +1,7 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { fromEvent, interval } from 'rxjs';
-import 'rxjs/add/operator/debounceTime';
-import 'rxjs/add/operator/take';
-import 'rxjs/add/operator/takeUntil';
+import { Component, OnInit } from '@angular/core';
+import { interval, of } from 'rxjs';
 import { Observable } from 'rxjs/observable';
-import { tap } from 'rxjs/operators';
+import { delay, take, takeUntil, switchMap } from 'rxjs/operators';
 
 @Component({
     selector: 'app-playground',
@@ -13,51 +10,56 @@ import { tap } from 'rxjs/operators';
 })
 export class MainComponent implements OnInit {
 
+    TICK_LENGTH = 1000;
+
+    TICK_TIMES = 10;
+
     private tick$: Observable<number>;
 
-    private terminator$: Observable<{}>;
+    private fakePromise$: Observable<string>;
 
     started = false;
 
+    fakePromiseDelay = 2000;
+
+    fakePromiseDelayOptions = [2, 4, 8, 12];
+
     output = [];
 
-    @ViewChild('terminate')
-    private terminateButton: ElementRef;
-
     ngOnInit() {
+        this.fakePromiseDelay = this.fakePromiseDelayOptions[0] * 1000;
+    }
 
+    setFakePromiseDelay(delayInSeconds) {
+        this.fakePromiseDelay = delayInSeconds * 1000;
     }
 
     start() {
         this.started = true;
-        this.createNewTerminator(this.terminateButton.nativeElement);
+        this.fakePromise(this.fakePromiseDelay);
         this.createNewTick();
         this.output = [];
 
-        this.tick$.takeUntil(this.terminator$)
-            .subscribe(
-                (v) => {
-                    console.log(v);
-                    this.output.push(v);
-                },
-                (err) => {
-                    console.error(err);
-                    this.started = false;
-                },
-                () => {
-                    console.log('completed');
-                    this.output.push('completed');
-                    this.started = false;
-                });
-    }
-
-    private createNewTerminator(el) {
-        this.terminator$ = fromEvent(el, 'click').debounceTime(350).pipe(tap(
-            () => this.output.push('terminated')
-        ));
+        this.tick$.pipe(
+            takeUntil(this.fakePromise$)
+        ).subscribe(
+            (v) => {
+                this.output.push(v);
+            },
+            (err) => {
+                this.started = false;
+            },
+            () => {
+                this.output.push('completed');
+                this.started = false;
+            });
     }
 
     private createNewTick() {
-        this.tick$ = interval(1000).take(20);
+        this.tick$ = interval(this.TICK_LENGTH).pipe(take(this.TICK_TIMES));
+    }
+
+    private fakePromise(ms) {
+        this.fakePromise$ = of('done').pipe(delay(ms));
     }
 }
