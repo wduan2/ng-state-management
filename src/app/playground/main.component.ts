@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { interval, of } from 'rxjs';
 import { Observable } from 'rxjs/observable';
-import { delay, take, takeUntil, switchMap } from 'rxjs/operators';
+import { delay, take, takeUntil, race } from 'rxjs/operators';
 
 @Component({
     selector: 'app-playground',
@@ -15,6 +15,8 @@ export class MainComponent implements OnInit {
     TICK_TIMES = 10;
 
     private tick$: Observable<number>;
+
+    private background$: Observable<string>;
 
     private fakePromise$: Observable<string>;
 
@@ -36,30 +38,36 @@ export class MainComponent implements OnInit {
 
     start() {
         this.started = true;
-        this.fakePromise(this.fakePromiseDelay);
+        this.createNewFakePromise(this.fakePromiseDelay);
         this.createNewTick();
+        this.createNewBackground();
         this.output = [];
 
-        this.tick$.pipe(
-            takeUntil(this.fakePromise$)
-        ).subscribe(
-            (v) => {
-                this.output.push(v);
+        this.background$.pipe(race(this.fakePromise$)).subscribe(
+            (msg) => {
+                this.started = true;
+                this.output.push(msg);
             },
             (err) => {
                 this.started = false;
             },
             () => {
-                this.output.push('completed');
                 this.started = false;
-            });
+            }
+        );
+
+        this.tick$.pipe(takeUntil(this.fakePromise$)).subscribe((v) => this.output.push(v));
     }
 
     private createNewTick() {
         this.tick$ = interval(this.TICK_LENGTH).pipe(take(this.TICK_TIMES));
     }
 
-    private fakePromise(ms) {
-        this.fakePromise$ = of('done').pipe(delay(ms));
+    private createNewBackground() {
+        this.background$ = of('timeout').pipe(delay(this.TICK_LENGTH * this.TICK_TIMES));
+    }
+
+    private createNewFakePromise(ms) {
+        this.fakePromise$ = of('resolved').pipe(delay(ms));
     }
 }
