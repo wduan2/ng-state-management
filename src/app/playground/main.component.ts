@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { interval, of } from 'rxjs';
 import { Observable } from 'rxjs/observable';
-import { delay, take, takeUntil, race } from 'rxjs/operators';
+import { concatAll, delay, filter, map, merge, take, takeUntil, tap } from 'rxjs/operators';
 
 @Component({
     selector: 'app-playground',
@@ -10,64 +10,107 @@ import { delay, take, takeUntil, race } from 'rxjs/operators';
 })
 export class MainComponent implements OnInit {
 
-    TICK_LENGTH = 1000;
+    TICK_SEC = 1;
 
-    TICK_TIMES = 10;
+    MOCK_PROMISE_DELAY_OPTS = [2, 4, 8, 12];
+
+    REJECTS_BEFORE_RESOLVE_OPTS = [1, 2, 3, 4, 5];
+
+    TIMEOUT_OPTS = [10, 15, 20, 25, 30];
+
+    private RESOLVED = 'resolved';
+
+    private REJECTED = 'rejected';
 
     private tick$: Observable<number>;
 
-    private background$: Observable<string>;
+    private timer$: Observable<string>;
 
-    private fakePromise$: Observable<string>;
+    private mockPromiseSequence$: Observable<string>;
 
     started = false;
 
-    fakePromiseDelay = 2000;
+    rejectsBeforeResolve = this.REJECTS_BEFORE_RESOLVE_OPTS[1];
 
-    fakePromiseDelayOptions = [2, 4, 8, 12];
+    mockPromiseDelay = this.MOCK_PROMISE_DELAY_OPTS[0];
+
+    timeout = this.TIMEOUT_OPTS[0];
 
     output = [];
 
     ngOnInit() {
-        this.fakePromiseDelay = this.fakePromiseDelayOptions[0] * 1000;
+
     }
 
-    setFakePromiseDelay(delayInSeconds) {
-        this.fakePromiseDelay = delayInSeconds * 1000;
+    setMockPromiseDelay(delaySec) {
+        this.mockPromiseDelay = delaySec;
+    }
+
+    setRejectsBeforeResolve(rejects) {
+        this.rejectsBeforeResolve = rejects;
+    }
+
+    setTimeout(timeoutSec) {
+        this.timeout = timeoutSec;
     }
 
     start() {
         this.started = true;
-        this.createNewFakePromise(this.fakePromiseDelay);
-        this.createNewTick();
-        this.createNewBackground();
         this.output = [];
 
-        this.background$.pipe(race(this.fakePromise$)).subscribe(
-            (msg) => {
-                this.started = true;
-                this.output.push(msg);
-            },
-            (err) => {
-                this.started = false;
-            },
-            () => {
-                this.started = false;
-            }
+        this.mockPromiseSequence$ = this.concatObs(this.createResponseGenertor(this.mockPromiseDelay, this.rejectsBeforeResolve));
+
+        const captureResolved$ = this.mockPromiseSequence$.pipe(filter((v) => v === this.RESOLVED));
+
+        this.timer$ = this.createTimer(this.timeout);
+
+        this.timer$.pipe(
+            merge(this.mockPromiseSequence$),
+            takeUntil(captureResolved$)
+        ).subscribe((msg) => {
+            this.started = true;
+            this.output.push(msg);
+        }, (err) => {
+            this.started = false;
+        }, () => {
+            this.started = false;
+            // takeUntil won't pass the fired value to the 'next' block
+            this.output.push(this.RESOLVED);
+        });
+
+        this.tick$ = this.createTick(this.TICK_SEC, Math.ceil(this.timeout / this.TICK_SEC));
+        this.tick$.pipe(takeUntil(captureResolved$)).subscribe((v) => this.output.push(v));
+    }
+
+    private createTick(tickSec: number, tickTimes: number): Observable<number> {
+        return interval(tickSec * 1000).pipe(take(tickTimes));
+    }
+
+    private createTimer(totalSec: number): Observable<string> {
+        return of('timeout').pipe(delay(totalSec * 1000));
+    }
+
+    private createResponseGenertor(delaySec: number, rejectTimes: number): Observable<string>[] {
+        const createRejected = () => of(this.REJECTED).pipe(delay(delaySec * 1000));
+
+        const createResolved = () => of(this.RESOLVED).pipe(delay(delaySec * 1000));
+
+        const orderedEvents = [];
+
+        for (let i = 0; i < rejectTimes; i++) {
+            orderedEvents.push(createRejected());
+        }
+
+        orderedEvents.push(createResolved());
+
+        return orderedEvents;
+    }
+
+    private concatObs(orderedEvents: Observable<string>[]): Observable<string> {
+        return interval(100).pipe(
+            take(orderedEvents.length),
+            map((i) => orderedEvents[i]),
+            concatAll()
         );
-
-        this.tick$.pipe(takeUntil(this.fakePromise$)).subscribe((v) => this.output.push(v));
-    }
-
-    private createNewTick() {
-        this.tick$ = interval(this.TICK_LENGTH).pipe(take(this.TICK_TIMES));
-    }
-
-    private createNewBackground() {
-        this.background$ = of('timeout').pipe(delay(this.TICK_LENGTH * this.TICK_TIMES));
-    }
-
-    private createNewFakePromise(ms) {
-        this.fakePromise$ = of('resolved').pipe(delay(ms));
     }
 }

@@ -1,19 +1,33 @@
 <div>
-  <div id="pg-buttons">
+  <div class="pg-buttons">
+    Promise Delay:
     <div class="select pg-button">
-      <select [(ngModel)]="fakePromiseDelay" (ngModelChange)="setFakePromiseDelay($event)">
-        <option [value]="delay" *ngFor="let delay of fakePromiseDelayOptions">{{delay}}s</option>
+      <select [(ngModel)]="mockPromiseDelay" (ngModelChange)="setMockPromiseDelay($event)">
+        <option [value]="delay" *ngFor="let delay of MOCK_PROMISE_DELAY_OPTS">{{delay}}s</option>
+      </select>
+    </div>
+
+    Rejects Before Resolve:
+    <div class="select pg-button">
+      <select [(ngModel)]="rejectsBeforeResolve" (ngModelChange)="setRejectsBeforeResolve($event)">
+        <option [value]="rejects" *ngFor="let rejects of REJECTS_BEFORE_RESOLVE_OPTS">{{rejects}}</option>
+      </select>
+    </div>
+
+    Timeout:
+    <div class="select pg-button">
+      <select [(ngModel)]="timeout" (ngModelChange)="setTimeout($event)">
+        <option [value]="timeoutSec" *ngFor="let timeoutSec of TIMEOUT_OPTS">{{timeoutSec}}s</option>
       </select>
     </div>
 
     <button class="button pg-button" [disabled]="started" (click)="start()">start</button>
   </div>
 
-  <div class="pg-output">
+  <div class="pg-config">
     <div class="notification is-warning">
-      tick interval: {{TICK_LENGTH / 1000}} * {{TICK_TIMES}} = {{ TICK_LENGTH / 1000 * TICK_TIMES}}s
-      <br/>
-      fake promise delay: {{fakePromiseDelay / 1000}}s
+      total waiting time: {{timeout}}s
+      &nbsp;&nbsp;promise resolve time: {{mockPromiseDelay * (rejectsBeforeResolve * 1000 / 1000 + 1)}}s
     </div>
   </div>
 
