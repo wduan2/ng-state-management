@@ -11,16 +11,17 @@
 .pg-config {
     margin: auto;
     width: 50%;
-    padding: 1%;
     text-align: center;
-    margin-bottom: 0;
-    padding: 1px;
+}
+
+.pg-expect {
+    color: red
 }
 
 .pg-output {
     margin: auto;
+    padding: 1%;
     width: 10%;
     text-align: center;
-    padding: 1px;
     display: inline-block;
 }

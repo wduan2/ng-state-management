@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { interval, of } from 'rxjs';
+import { interval, of, race } from 'rxjs';
 import { Observable } from 'rxjs/observable';
-import { concatAll, delay, filter, map, merge, take, takeUntil, tap } from 'rxjs/operators';
+import { concatAll, delay, filter, map, take, takeUntil, tap } from 'rxjs/operators';
 
 @Component({
     selector: 'app-playground',
@@ -42,8 +42,8 @@ export class MainComponent implements OnInit {
 
     }
 
-    setMockPromiseDelay(delaySec) {
-        this.mockPromiseDelay = delaySec;
+    setMockPromiseDelay(promiseDelaySec) {
+        this.mockPromiseDelay = promiseDelaySec;
     }
 
     setRejectsBeforeResolve(rejects) {
@@ -54,42 +54,68 @@ export class MainComponent implements OnInit {
         this.timeout = timeoutSec;
     }
 
+    expectResult(timeoutSec, promiseDelaySec, rejectsBeforeResolve) {
+        const promiseResolveSec = promiseDelaySec * (rejectsBeforeResolve * 1000 / 1000 + 1);
+        if (promiseResolveSec > timeoutSec) {
+            return 'timeout will happen';
+        } else if (promiseResolveSec < timeoutSec) {
+            return 'promise will be resolved';
+        } else {
+            return 'race condition';
+        }
+    }
+
     start() {
         this.started = true;
         this.output = [];
 
-        this.mockPromiseSequence$ = this.concatObs(this.createResponseGenertor(this.mockPromiseDelay, this.rejectsBeforeResolve));
-
-        const captureResolved$ = this.mockPromiseSequence$.pipe(filter((v) => v === this.RESOLVED));
-
         this.timer$ = this.createTimer(this.timeout);
 
-        this.timer$.pipe(
-            merge(this.mockPromiseSequence$),
-            takeUntil(captureResolved$)
-        ).subscribe((msg) => {
-            this.started = true;
-            this.output.push(msg);
-        }, (err) => {
-            this.started = false;
-        }, () => {
-            this.started = false;
-            // takeUntil won't pass the fired value to the 'next' block
-            this.output.push(this.RESOLVED);
-        });
+        /**
+         * An Observable that will fire an event periodically.
+         */
+        this.mockPromiseSequence$ = this.concatObs(
+            this.createResponseGenertor(this.mockPromiseDelay, this.rejectsBeforeResolve)
+        );
+
+        const resolve$ = this.mockPromiseSequence$.pipe(filter((v) => v === this.RESOLVED));
+
+        // tap will cause duplicate values for some reason
+        const reject$ = this.mockPromiseSequence$.pipe(filter((v) => v === this.REJECTED));
+        reject$.subscribe((v) => this.output.push(v));
+
+        const winner$ = race(this.timer$, resolve$);
+
+        winner$.subscribe(
+            (v) => {
+                this.started = true;
+                this.output.push(v);
+            }, (err) => {
+                this.started = false;
+                this.output.push(err);
+            }, () => {
+                this.started = false;
+                this.output.push('completed');
+            });
 
         this.tick$ = this.createTick(this.TICK_SEC, Math.ceil(this.timeout / this.TICK_SEC));
-        this.tick$.pipe(takeUntil(captureResolved$)).subscribe((v) => this.output.push(v));
+        this.tick$.pipe(takeUntil(winner$)).subscribe((v) => this.output.push(v));
     }
 
     private createTick(tickSec: number, tickTimes: number): Observable<number> {
         return interval(tickSec * 1000).pipe(take(tickTimes));
     }
 
-    private createTimer(totalSec: number): Observable<string> {
-        return of('timeout').pipe(delay(totalSec * 1000));
+    private createTimer(timeoutSec: number): Observable<string> {
+        return of('timeout').pipe(delay(timeoutSec * 1000));
     }
 
+    /**
+     * Create a list of Observable that will fire event after a certain delay.
+     *
+     * @param delaySec
+     * @param rejectTimes
+     */
     private createResponseGenertor(delaySec: number, rejectTimes: number): Observable<string>[] {
         const createRejected = () => of(this.REJECTED).pipe(delay(delaySec * 1000));
 
@@ -106,6 +132,11 @@ export class MainComponent implements OnInit {
         return orderedEvents;
     }
 
+    /**
+     * Concat a list of Observables into one Observable.
+     *
+     * @param orderedEvents
+     */
     private concatObs(orderedEvents: Observable<string>[]): Observable<string> {
         return interval(100).pipe(
             take(orderedEvents.length),

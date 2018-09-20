@@ -21,13 +21,15 @@
       </select>
     </div>
 
-    <button class="button pg-button" [disabled]="started" (click)="start()">start</button>
+    <button class="button is-primary pg-button" [disabled]="started" (click)="start()">start</button>
   </div>
 
   <div class="pg-config">
     <div class="notification is-warning">
       total waiting time: {{timeout}}s
       &nbsp;&nbsp;promise resolve time: {{mockPromiseDelay * (rejectsBeforeResolve * 1000 / 1000 + 1)}}s
+      <br/>
+      <p class="pg-expect">{{expectResult(timeout, mockPromiseDelay, rejectsBeforeResolve)}}</p>
     </div>
   </div>
 
